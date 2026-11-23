@@ -1,0 +1,14 @@
+# Maven
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Runtime data (плагин создаёт в plugins/fcp-CasinoRoulette/)
+balances.yml
+tables.yml
+
+# Logs
+*.log

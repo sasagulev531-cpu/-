@@ -1,0 +1,90 @@
+# ============================================================
+#  fcp-CasinoRoulette — конфигурация
+#  Все сообщения поддерживают цветовые коды '&' и плейсхолдеры.
+# ============================================================
+
+# --- Валюта FCP ---
+# coins (по умолчанию) — основная валюта FCP (%fcp_coins%);
+# dcoins — донат-монеты (%fcp_donate_coins%).
+# Без FCP-EconomyMarket казино работает на тестовом кошельке balances.yml.
+fcp-currency: coins
+
+# --- Фазы игры ---
+betting-seconds: 20        # сколько принимаются ставки
+result-seconds: 5          # сколько показывается результат
+spin-seconds: 12           # длительность прокрутки шарика (10-15 для кинематографичности)
+ball-turns: 5.0            # сколько оборотов делает шарик
+wheel-turns: 2.5           # сколько оборотов делает колесо
+
+# --- Лимиты ставок ---
+min-bet: 10
+max-bet: 100000            # максимум на одну позицию (суммарно)
+max-total-per-spin: 500000 # максимум суммарных ставок игрока за прокрутку
+return-stake-on-win: true  # возвращать ли ставку вместе с выигрышем
+broadcast-radius: 30       # радиус оповещений вокруг стола
+
+# --- Внешний вид ---
+show-table-numbers: true   # цифры над ячейками стола
+show-wheel-numbers: false  # цифры над лунками колеса (37 голограмм, нагружает)
+chip-material: SUNFLOWER   # предмет-фишка в руке
+chip-name: "&6&lФИШКА"     # если пусто — проверяется только тип предмета
+
+# --- Номиналы фишек и цвет ковра на столе ---
+chips:
+  denominations: [10, 50, 100, 500, 1000]
+  colors:
+    10: WHITE_CARPET
+    50: ORANGE_CARPET
+    100: LIGHT_BLUE_CARPET
+    500: PURPLE_CARPET
+    1000: YELLOW_CARPET
+
+# --- Сообщения ---
+messages:
+  prefix: "&6&lКазино &8| &f"
+  no-permission: "&cНедостаточно прав."
+  only-players: "&cЭту команду может использовать только игрок."
+  table-created: "&aСтол &e{id} &aсоздан! Ставки принимаются."
+  table-removed: "&aСтол &e{id} &aудалён."
+  table-not-found: "&cСтол не найден."
+  player-not-found: "&cИгрок не найден."
+  tables-list-header: "&6Столы казино:"
+  tables-list-entry: " &e{id} &7— {phase} &7@ {world} {x}, {y}, {z}"
+  phase-betting: "&a&lприём ставок"
+  phase-spinning: "&c&lпрокрутка"
+  phase-result: "&e&lрезультат"
+  betting-countdown: "&eСтавки принимаются: &f{seconds} сек"
+  no-bets: "&7Ставок не было — крутим без игроков."
+  spin-start: "&c&lСтавки закрыты! &fШарик запущен, удачи..."
+  result: "&6&lВыпало: {number} {color}"
+  color-zero: "&aЗЕРО"
+  color-red: "&cкрасное"
+  color-black: "&8чёрное"
+  you-win: "&a&lВы выиграли {amount}! &7({bet})"
+  you-lose: "&7Ваша ставка {amount} не сыграла. ({bet})"
+  win-broadcast: "&e{player} &fвыиграл &a{amount} &fна ставке {bet}"
+  bet-placed: "&aСтавка {amount} принята: &f{bet}"
+  bet-merged: "&aДобавлено {amount}: &f{bet} &7(итого {total})"
+  chip-selected: "&eВыбран номинал фишки: &f{amount}"
+  chip-list: "&eДоступные номиналы: &f{list}"
+  balance: "&eВаш баланс: &f{amount}"
+  balance-given: "&aВыдано {amount} игроку {player}. Новый баланс: {balance}"
+  balance-set: "&aБаланс игрока {player} установлен: {balance}"
+  not-enough: "&cНедостаточно средств. Нужно {amount}, у вас {balance}."
+  below-min: "&cМинимальная ставка — {min}."
+  above-max: "&cМаксимальная ставка — {max}."
+  above-max-total: "&cПревышен лимит ставок на эту прокрутку ({limit})."
+  betting-closed: "&cСтавки закрыты, ждите прокрутку."
+  protected-block: "&cЭта зона принадлежит казино."
+  reloaded: "&aКонфиг перезагружен."
+  help: |
+    &6&l--- Казино Рулетка ---
+    &e/roulette create &7— создать стол (смотрите на место колеса)
+    &e/roulette remove [id] &7— удалить стол
+    &e/roulette list &7— список столов
+    &e/roulette chip [сумма] &7— выбрать номинал фишки
+    &e/roulette balance &7— ваш баланс
+    &e/roulette give <игрок> <сумма> &7— выдать тестовую валюту
+    &e/roulette set <игрок> <сумма> &7— установить баланс
+    &e/roulette spin &7— форсировать прокрутку
+    &e/roulette reload &7— перезагрузить конфиг

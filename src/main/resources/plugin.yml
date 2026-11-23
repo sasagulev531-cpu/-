@@ -1,0 +1,20 @@
+name: fcp-CasinoRoulette
+version: 1.0.0
+main: Frontiks.Craft.casino.CasinoPlugin
+api-version: '1.21'
+author: Frontiks
+description: FCP european roulette — physical table, bets on FCP coins
+website: https://example.com
+softdepend: [FCP-Core, FCP-EconomyMarket]
+commands:
+  roulette:
+    description: Управление казино-рулеткой
+    usage: /roulette <create|remove|list|chip|balance|give|set|spin|reload>
+    aliases: [roulet, casino, rl]
+permissions:
+  roulette.admin:
+    description: Админские команды казино
+    default: op
+  roulette.play:
+    description: Позволяет делать ставки
+    default: true
