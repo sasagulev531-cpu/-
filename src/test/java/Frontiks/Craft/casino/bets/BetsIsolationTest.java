@@ -95,4 +95,17 @@ class BetsIsolationTest {
         Bet bob = new Bet(BOB, "Bob", BetType.BLACK, blacks(), 10);
         assertEquals(BetBook.Status.OK, book.validate(bob, 10, 200000, 100000));
     }
+    @Test
+    void clearingOnlyOnePlayerRefundsTheirOwnBets() {
+        BetBook book = new BetBook();
+        book.put(new Bet(ALICE, "Alice", BetType.RED, reds(), 100));
+        book.put(new Bet(ALICE, "Alice", BetType.BLACK, blacks(), 50));
+        book.put(new Bet(BOB, "Bob", BetType.RED, reds(), 70));
+        assertEquals(220, book.total());
+        assertEquals(150, book.playerTotal(ALICE));
+        assertEquals(150, book.removePlayer(ALICE));
+        assertEquals(70, book.total());
+        assertEquals(70, book.playerTotal(BOB));
+        assertEquals(1, book.size());
+    }
 }

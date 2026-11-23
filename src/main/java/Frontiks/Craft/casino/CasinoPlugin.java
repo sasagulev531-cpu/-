@@ -5,24 +5,29 @@ import Frontiks.Craft.casino.balance.BalanceProvider;
 import Frontiks.Craft.casino.balance.FcpHook;
 import Frontiks.Craft.casino.balance.FileBalanceProvider;
 import Frontiks.Craft.casino.commands.RouletteCommand;
-import Frontiks.Craft.casino.listeners.TableListener;
-import Frontiks.Craft.casino.table.TableManager;
+import Frontiks.Craft.casino.game.RouletteGame;
+import Frontiks.Craft.casino.gui.CasinoGui;
+import Frontiks.Craft.casino.gui.CasinoGuiListener;
 import Frontiks.Craft.casino.util.ChipManager;
 import Frontiks.Craft.casino.util.Messages;
 
 /**
- * fcp-CasinoRoulette — европейская рулетка для Paper 1.21.x.
+ * fcp-CasinoRoulette — европейская рулетка для Paper 1.21.x в GUI.
  *
- * Валюта: монеты FCP (Coins) через {@code Frontiks.Craft.api.EconomyService};
- * при отсутствии FCP-EconomyMarket — тестовый кошелёк {@link FileBalanceProvider}.
+ * <p>Игра идёт в меню (54 слота): числа 0–36, внешние ставки, выбор фишки.
+ * Раунд общий для всего сервера — ставки всех игроков сходятся в один спин.</p>
+ *
+ * <p>Валюта: монеты FCP (Coins) через {@code EconomyService}; при отсутствии
+ * FCP-EconomyMarket — тестовый кошелёк {@link FileBalanceProvider}.</p>
  */
 public class CasinoPlugin extends JavaPlugin {
 
     private static CasinoPlugin instance;
 
     private BalanceProvider balanceProvider;
-    private TableManager tableManager;
     private ChipManager chipManager;
+    private RouletteGame game;
+    private CasinoGui gui;
 
     @Override
     public void onEnable() {
@@ -36,7 +41,6 @@ public class CasinoPlugin extends JavaPlugin {
         try {
             fcpProvider = FcpHook.create(this);
         } catch (NoClassDefFoundError | IllegalStateException e) {
-            // FCP-Core/EconomyMarket нет на сервере — работаем на тестовом кошельке
             fcpProvider = null;
         }
         if (fcpProvider != null) {
@@ -46,22 +50,29 @@ public class CasinoPlugin extends JavaPlugin {
             getLogger().warning("FCP Economy не найден — казино работает на тестовой валюте (balances.yml)");
         }
 
-        this.tableManager = new TableManager(this);
-        tableManager.load();
-        getServer().getPluginManager().registerEvents(new TableListener(this), this);
+        // === ИГРА и GUI ===
+        this.gui = new CasinoGui(this);
+        this.game = new RouletteGame(this);
+
+        getServer().getPluginManager().registerEvents(new CasinoGuiListener(this), this);
         RouletteCommand executor = new RouletteCommand(this);
         var command = getCommand("roulette");
         if (command != null) {
             command.setExecutor(executor);
             command.setTabCompleter(executor);
         }
-        getLogger().info("fcp-CasinoRoulette включён. Столов: " + tableManager.all().size());
+
+        game.start();
+        getLogger().info("fcp-CasinoRoulette включён. Раунд общий, ставки принимаются в /roulette");
     }
 
     @Override
     public void onDisable() {
-        if (tableManager != null) {
-            tableManager.shutdown();
+        if (gui != null) {
+            gui.closeAll();
+        }
+        if (game != null) {
+            game.stop();
         }
         if (balanceProvider != null) {
             balanceProvider.save();
@@ -77,11 +88,15 @@ public class CasinoPlugin extends JavaPlugin {
         return balanceProvider;
     }
 
-    public TableManager getTableManager() {
-        return tableManager;
-    }
-
     public ChipManager getChipManager() {
         return chipManager;
+    }
+
+    public RouletteGame getGame() {
+        return game;
+    }
+
+    public CasinoGui getGui() {
+        return gui;
     }
 }

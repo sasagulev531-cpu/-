@@ -51,6 +51,42 @@ public final class BetBook {
         return bets.get(key(player, bet));
     }
 
+    /** Ставка игрока на конкретной позиции (тип + числа) или null. */
+    public Bet get(UUID player, BetType type, java.util.Set<Integer> numbers) {
+        return bets.get(player + ":" + Bet.positionKey(type, numbers));
+    }
+
+    /** Суммарная ставка игрока за прокрутку. */
+    public long playerTotal(UUID player) {
+        return bets.values().stream()
+                .filter(b -> b.getPlayer().equals(player))
+                .mapToLong(Bet::getAmount)
+                .sum();
+    }
+
+    /** Суммарный банк всех игроков за прокрутку. */
+    public long total() {
+        return bets.values().stream().mapToLong(Bet::getAmount).sum();
+    }
+
+    /**
+     * Снимает все ставки игрока (для кнопки «сбросить мои ставки»).
+     *
+     * @return сумма снятых ставок — её нужно вернуть игроку
+     */
+    public long removePlayer(UUID player) {
+        long refunded = 0;
+        java.util.Iterator<Bet> it = bets.values().iterator();
+        while (it.hasNext()) {
+            Bet bet = it.next();
+            if (bet.getPlayer().equals(player)) {
+                refunded += bet.getAmount();
+                it.remove();
+            }
+        }
+        return refunded;
+    }
+
     /**
      * Проверяет лимиты, не изменяя реестр.
      *

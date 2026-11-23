@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 /**
  * Ставка игрока. Позиционный ключ ставки — тип + набор чисел
- * ({@link #key()}). Полный ключ в реестре стола —
+ * ({@link #key()}). Полный ключ в реестре ставок —
  * {@code UUID игрока + ":" + positionKey} (см. {@code BetBook}),
  * поэтому ставки разных игроков на одной позиции не склеиваются.
  *
@@ -55,15 +55,20 @@ public class Bet {
     }
 
     /**
-     * Позиционный ключ ставки: {@code TYPE:числа} (без игрока).
+     * Позиционный ключ ставки: {@code TYPE:числа} (без игрока), числа отсортированы.
      *
      * <p>ВНИМАНИЕ: это ключ <b>позиции</b>, а не полный ключ реестра.
-     * В {@code RouletteTable}/{@code BetBook} ставки хранятся под ключом
-     * {@code UUID:positionKey}, иначе ставки разных игроков на одной
-     * позиции сливаются (баг R1).</p>
+     * В {@code BetBook} ставки хранятся под ключом {@code UUID:positionKey},
+     * иначе ставки разных игроков на одной позиции сливаются (баг R1).</p>
      */
     public String key() {
-        return type.name() + ":" + numbers.stream().map(String::valueOf).collect(Collectors.joining(","));
+        return positionKey(type, numbers);
+    }
+
+    /** Позиционный ключ по типу и набору чисел (без игрока). */
+    public static String positionKey(BetType type, Set<Integer> numbers) {
+        return type.name() + ":" + numbers.stream().sorted()
+                .map(String::valueOf).collect(Collectors.joining(","));
     }
 
     /** Человекочитаемое описание, например "сплит 5-8" или "красное". */

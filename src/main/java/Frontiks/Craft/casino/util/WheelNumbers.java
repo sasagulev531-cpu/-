@@ -1,7 +1,5 @@
 package Frontiks.Craft.casino.util;
 
-import org.bukkit.Material;
-
 import java.util.Set;
 
 /**
@@ -40,11 +38,4 @@ public final class WheelNumbers {
         return -1;
     }
 
-    /** Блок-«шапка» для лунки на колесе. */
-    public static Material helmetFor(int number) {
-        if (number == 0) {
-            return Material.GREEN_CONCRETE;
-        }
-        return isRed(number) ? Material.RED_CONCRETE : Material.BLACK_CONCRETE;
-    }
 }

@@ -9,9 +9,6 @@ import java.util.UUID;
  * {@code EconomyService}); {@link FileBalanceProvider} — тестовый fallback
  * для стендов без FCP-EconomyMarket.</p>
  *
- * <p>Чтобы подключить свою валюту (Vault, свой плагин и т.д.):
- *  1. Создайте класс, реализующий этот интерфейс.
- *  2. В CasinoPlugin#onEnable замените создание провайдера на свой.</p>
  */
 public interface BalanceProvider {
 

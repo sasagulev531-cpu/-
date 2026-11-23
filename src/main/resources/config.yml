@@ -9,27 +9,27 @@
 # Без FCP-EconomyMarket казино работает на тестовом кошельке balances.yml.
 fcp-currency: coins
 
-# --- Фазы игры ---
+# --- Общий раунд GUI (все игроки ставят на один спин) ---
 betting-seconds: 20        # сколько принимаются ставки
 result-seconds: 5          # сколько показывается результат
-spin-seconds: 12           # длительность прокрутки шарика (10-15 для кинематографичности)
-ball-turns: 5.0            # сколько оборотов делает шарик
-wheel-turns: 2.5           # сколько оборотов делает колесо
+spin-seconds: 12           # длительность анимации в GUI
+ball-turns: 5.0            # количество оборотов подсветки в порядке EUROPEAN_ORDER
+wheel-turns: 2.5           # устаревший ключ, не влияет на GUI
 
 # --- Лимиты ставок ---
 min-bet: 10
 max-bet: 100000            # максимум на одну позицию (суммарно)
 max-total-per-spin: 500000 # максимум суммарных ставок игрока за прокрутку
 return-stake-on-win: true  # возвращать ли ставку вместе с выигрышем
-broadcast-radius: 30       # радиус оповещений вокруг стола
+broadcast-radius: 30       # старый ключ: GUI оповещает участников общего раунда
 
-# --- Внешний вид ---
-show-table-numbers: true   # цифры над ячейками стола
-show-wheel-numbers: false  # цифры над лунками колеса (37 голограмм, нагружает)
-chip-material: SUNFLOWER   # предмет-фишка в руке
-chip-name: "&6&lФИШКА"     # если пусто — проверяется только тип предмета
+# --- Совместимость со старым config.yml (поля ниже сохранены, но GUI их не использует) ---
+show-table-numbers: true   # устаревший ключ, не влияет на GUI
+show-wheel-numbers: false  # устаревший ключ, не влияет на GUI
+chip-material: SUNFLOWER   # устаревший ключ, фишки выбираются в GUI
+chip-name: "&6&lФИШКА"     # устаревший ключ, не влияет на GUI
 
-# --- Номиналы фишек и цвет ковра на столе ---
+# --- Номиналы фишек и материалы их иконок в GUI ---
 chips:
   denominations: [10, 50, 100, 500, 1000]
   colors:
@@ -44,14 +44,14 @@ messages:
   prefix: "&6&lКазино &8| &f"
   no-permission: "&cНедостаточно прав."
   only-players: "&cЭту команду может использовать только игрок."
-  table-created: "&aСтол &e{id} &aсоздан! Ставки принимаются."
-  table-removed: "&aСтол &e{id} &aудалён."
-  table-undo-restored: "&aСтол &e{id} &aубран, блоки восстановлены."
-  table-undo-cleared: "&aСтол &e{id} &aубран, блоки стола удалены (снимка не было)."
-  table-not-found: "&cСтол не найден."
+  table-created: "&7Устаревший ключ, не используется."
+  table-removed: "&7Устаревший ключ, не используется."
+  table-undo-restored: "&7Устаревший ключ, не используется."
+  table-undo-cleared: "&7Устаревший ключ, не используется."
+  table-not-found: "&7Устаревший ключ, не используется."
   player-not-found: "&cИгрок не найден."
-  tables-list-header: "&6Столы казино:"
-  tables-list-entry: " &e{id} &7— {phase} &7@ {world} {x}, {y}, {z}"
+  tables-list-header: "&7Устаревший ключ, не используется."
+  tables-list-entry: "&7Устаревший ключ, не используется."
   phase-betting: "&a&lприём ставок"
   phase-spinning: "&c&lпрокрутка"
   phase-result: "&e&lрезультат"
@@ -77,17 +77,27 @@ messages:
   above-max: "&cМаксимальная ставка — {max}."
   above-max-total: "&cПревышен лимит ставок на эту прокрутку ({limit})."
   betting-closed: "&cСтавки закрыты, ждите прокрутку."
-  protected-block: "&cЭта зона принадлежит казино."
+  protected-block: "&7Устаревший ключ, не используется."
   reloaded: "&aКонфиг перезагружен."
+  gui-title: "&6&lКазино &8| &fРулетка"
+  gui-phase-betting: "&aПриём ставок"
+  gui-phase-spinning: "&eШарик крутится"
+  gui-phase-result: "&6Итоги раунда"
+  gui-countdown: "&7До прокрутки: &f{seconds} сек"
+  gui-spinning-lore: "&eСтавки закрыты, ждите результат"
+  gui-result: "&6Выпало: &f{number}"
+  gui-bank: "&7Общий банк: &f{amount}"
+  gui-your-bets: "&7Ваши ставки: &f{amount}"
+  gui-limits: "&7Минимальная ставка: &f{min}"
+  gui-invalid-position: "&cЭта комбинация невозможна для данного числа."
+  gui-bets-cleared: "&aВаши ставки сняты. Возвращено: {amount}"
+  gui-no-bets: "&7У вас нет ставок на этот раунд."
+  invalid-amount: "&cУкажите сумму от 0 до 2147483647 (ставка должна быть положительной)."
+  not-enough-admin: "&cНе удалось списать средства игрока."
   help: |
     &6&l--- Казино Рулетка ---
-    &e/roulette create &7— создать стол (смотрите на место колеса)
-    &e/roulette remove [id] &7— удалить стол (блоки остаются)
-    &e/roulette undo [id] &7— убрать стол и восстановить блоки
-    &e/roulette list &7— список столов
-    &e/roulette chip [сумма] &7— выбрать номинал фишки
+    &e/roulette &7— открыть GUI: числа, внешние ставки, комбинации
     &e/roulette balance &7— ваш баланс
-    &e/roulette give <игрок> <сумма> &7— выдать тестовую валюту
-    &e/roulette set <игрок> <сумма> &7— установить баланс
-    &e/roulette spin &7— форсировать прокрутку
-    &e/roulette reload &7— перезагрузить конфиг
+    &e/roulette give <игрок> <сумма> &7— начислить монеты (админ)
+    &e/roulette set <игрок> <сумма> &7— установить баланс (админ)
+    &e/roulette reload &7— перечитать конфиг (админ)
