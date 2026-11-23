@@ -66,6 +66,30 @@ public class TableManager {
         return true;
     }
 
+    /**
+     * Полный откат постройки: удалить стол (сущности + запись) и восстановить
+     * блоки, которые были на этом месте до {@code /roulette create}.
+     *
+     * @return {@code UndoResult.RESTORED} — блоки восстановлены по снимку;
+     *         {@code UndoResult.CLEARED} — снимка не было, область очищена воздухом;
+     *         {@code null} — стол не найден
+     */
+    public UndoResult undoTable(String id) {
+        RouletteTable table = tables.remove(id);
+        if (table == null) {
+            return null;
+        }
+        table.stop();
+        boolean restored = table.restoreBlocks();
+        save();
+        return restored ? UndoResult.RESTORED : UndoResult.CLEARED;
+    }
+
+    public enum UndoResult {
+        RESTORED,
+        CLEARED
+    }
+
     /** Стол, в зону которого попадает локация, или null. */
     public RouletteTable findTableAt(Location location) {
         for (RouletteTable table : tables.values()) {
@@ -112,10 +136,16 @@ public class TableManager {
             float yaw = (float) section.getDouble(id + ".yaw");
             RouletteTable table = new RouletteTable((Frontiks.Craft.casino.CasinoPlugin) plugin, id,
                     new Location(world, x, y, z), yaw);
+            loadOriginalBlocks(section, id, table);
             table.start();
             tables.put(id, table);
         }
         plugin.getLogger().info("Загружено столов рулетки: " + tables.size());
+    }
+
+    /** Загружает снимок исходных блоков стола из tables.yml. */
+    private void loadOriginalBlocks(ConfigurationSection section, String id, RouletteTable table) {
+        table.setOriginalBlocks(section.getStringList(id + ".blocks"));
     }
 
     public void save() {
@@ -128,6 +158,10 @@ public class TableManager {
             yaml.set(path + ".y", c.getY());
             yaml.set(path + ".z", c.getZ());
             yaml.set(path + ".yaw", (double) table.getYaw());
+            // снимок исходных блоков — для /roulette undo
+            if (!table.getOriginalBlocks().isEmpty()) {
+                yaml.set(path + ".blocks", table.getOriginalBlocks().serialize());
+            }
         }
         try {
             yaml.save(file);

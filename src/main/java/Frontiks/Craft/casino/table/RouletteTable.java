@@ -23,6 +23,7 @@ import Frontiks.Craft.casino.util.WheelNumbers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -51,6 +52,13 @@ public class RouletteTable {
     private Phase phase = Phase.BETTING;
     private int phaseTicks;
     private final BetBook bets = new BetBook();
+
+    /**
+     * Снимок блоков, которые были на месте стола ДО постройки.
+     * Нужен для {@code /roulette undo}, чтобы откатить постройку,
+     * а не просто стереть всё воздухом.
+     */
+    private final BlockSnapshot originalBlocks = new BlockSnapshot();
 
     private final List<ArmorStand> pockets = new ArrayList<>();
     private final List<ArmorStand> chipStands = new ArrayList<>();
@@ -583,6 +591,73 @@ public class RouletteTable {
                 center.getX() + rx * lx + fx * lz,
                 center.getY() + yOffset,
                 center.getZ() + rz * lx + fz * lz);
+    }
+
+    // ---------------------------------------------------------------
+    //  Откат постройки (/roulette undo)
+    // ---------------------------------------------------------------
+
+    /**
+     * Запоминает исходное состояние блока перед постройкой стола.
+     * Вызывается из {@link TableBuilder} для каждого блока.
+     */
+    public void recordOriginalBlock(int x, int y, int z, String blockData) {
+        originalBlocks.record(x, y, z, blockData);
+    }
+
+    /** @return снимок исходных блоков ({@code "x,y,z" -> BlockData}) */
+    public BlockSnapshot getOriginalBlocks() {
+        return originalBlocks;
+    }
+
+    /** Загружает снимок исходных блоков из tables.yml. */
+    public void setOriginalBlocks(List<String> entries) {
+        BlockSnapshot loaded = BlockSnapshot.deserialize(entries);
+        for (Map.Entry<String, String> entry : loaded.asMap().entrySet()) {
+            String[] coords = entry.getKey().split(",");
+            originalBlocks.record(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]),
+                    Integer.parseInt(coords[2]), entry.getValue());
+        }
+    }
+
+    /**
+     * Убирает стол и восстанавливает блоки, которые были до постройки.
+     *
+     * <p>Если снимка нет (стол создан до появления {@code /roulette undo}),
+     * в fallback очищается вся область стола блоками воздуха — иначе
+     * «откат» оставил бы бетон и камень в мире.</p>
+     *
+     * @return true, если блоки были восстановлены по снимку
+     */
+    public boolean restoreBlocks() {
+        org.bukkit.World world = center.getWorld();
+        if (world == null) {
+            return false;
+        }
+        if (originalBlocks.isEmpty()) {
+            TableBuilder.remove(this);
+            return false;
+        }
+        int restored = 0;
+        for (Map.Entry<String, String> entry : originalBlocks.asMap().entrySet()) {
+            String[] coords = entry.getKey().split(",");
+            if (coords.length != 3) {
+                continue;
+            }
+            int x = Integer.parseInt(coords[0]);
+            int y = Integer.parseInt(coords[1]);
+            int z = Integer.parseInt(coords[2]);
+            world.getChunkAt(x >> 4, z >> 4).load();
+            try {
+                world.getBlockAt(x, y, z).setBlockData(org.bukkit.Bukkit.createBlockData(entry.getValue()), false);
+                restored++;
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Не удалось восстановить блок " + entry.getKey()
+                        + " (" + entry.getValue() + "): " + e.getMessage());
+            }
+        }
+        plugin.getLogger().info("Стол " + id + ": восстановлено блоков после отката — " + restored);
+        return true;
     }
 
     // ---------------------------------------------------------------

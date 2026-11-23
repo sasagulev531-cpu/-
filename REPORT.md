@@ -4,7 +4,7 @@
 **База:** `CasinoRoulette-source.zip`, sha256
 `efb97c860b773f1bcc1e880427f228236fb2b81feff2dfdd908607e18612b975` — совпадает.
 **Артефакт:** `fcp-casino-roulette-1.0.0.jar`
-sha256 `c4de425b73d58c50d29fd6d8e289e9234819b47f148cc92eaab70b429e30191e` (51 КБ, 25 классов, `plugin.yml` + `config.yml` внутри)
+sha256 `e42b11c515fe3fe6e17b2476aba49953b1df86eda668baef9c238d7cdd44c064` (57 КБ, 28 классов, `plugin.yml` + `config.yml` внутри)
 
 ---
 
@@ -88,7 +88,7 @@ sha256 `c4de425b73d58c50d29fd6d8e289e9234819b47f148cc92eaab70b429e30191e` (51 К
 
 ### R10 — юнит-тесты ✅
 
-JUnit 5 + `maven-surefire-plugin` 3.2.5. **32 теста**, все зелёные:
+JUnit 5 + `maven-surefire-plugin` 3.2.5. **36 тестов**, все зелёные:
 
 | Класс | Тестов |
 |---|---|
@@ -99,6 +99,19 @@ JUnit 5 + `maven-surefire-plugin` 3.2.5. **32 теста**, все зелёны�
 | `BetsIsolationTest` | 4 |
 | `PayoutTest` | 2 |
 | `FcpBalanceProviderTest` | 6 |
+| `BlockSnapshotTest` | 4 |
+
+### Дополнительно (вне ТЗ): `/roulette undo` — откат постройки
+
+По запросу пользователя добавлена команда полного отката `/roulette undo [id]`:
+убирает стол (сущности + запись) и **восстанавливает блоки, которые были на
+этом месте до `/roulette create`** (а не просто стирает область воздухом).
+
+- `TableBuilder` при постройке запоминает исходный `BlockData` каждого блока;
+- снимок хранится в `tables.yml` (секция `blocks`) — откат работает и после
+  перезапуска сервера;
+- если снимка нет (стол создан раньше) — fallback: область очищается воздухом;
+- `/roulette remove` поведение не менял: он по-прежнему оставляет блоки.
 
 ### R11 — README и отчёт ✅
 
@@ -128,7 +141,7 @@ JUnit 5 + `maven-surefire-plugin` 3.2.5. **32 теста**, все зелёны�
 
 `pom.xml` стандартный: `maven-surefire-plugin` 3.2.5 + `junit-jupiter` 5.11.0;
 в окружении владельца `mvn -B clean package` должен собрать джар и прогнать
-те же 32 теста.
+те же 36 тестов.
 
 ## Ограничения
 

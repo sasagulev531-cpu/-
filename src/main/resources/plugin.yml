@@ -9,7 +9,7 @@ softdepend: [FCP-Core, FCP-EconomyMarket]
 commands:
   roulette:
     description: Управление казино-рулеткой
-    usage: /roulette <create|remove|list|chip|balance|give|set|spin|reload>
+    usage: /roulette <create|remove|undo|list|chip|balance|give|set|spin|reload>
     aliases: [roulet, casino, rl]
 permissions:
   roulette.admin:

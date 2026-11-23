@@ -46,6 +46,8 @@ messages:
   only-players: "&cЭту команду может использовать только игрок."
   table-created: "&aСтол &e{id} &aсоздан! Ставки принимаются."
   table-removed: "&aСтол &e{id} &aудалён."
+  table-undo-restored: "&aСтол &e{id} &aубран, блоки восстановлены."
+  table-undo-cleared: "&aСтол &e{id} &aубран, блоки стола удалены (снимка не было)."
   table-not-found: "&cСтол не найден."
   player-not-found: "&cИгрок не найден."
   tables-list-header: "&6Столы казино:"
@@ -80,7 +82,8 @@ messages:
   help: |
     &6&l--- Казино Рулетка ---
     &e/roulette create &7— создать стол (смотрите на место колеса)
-    &e/roulette remove [id] &7— удалить стол
+    &e/roulette remove [id] &7— удалить стол (блоки остаются)
+    &e/roulette undo [id] &7— убрать стол и восстановить блоки
     &e/roulette list &7— список столов
     &e/roulette chip [сумма] &7— выбрать номинал фишки
     &e/roulette balance &7— ваш баланс

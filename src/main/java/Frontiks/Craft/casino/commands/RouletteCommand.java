@@ -32,6 +32,7 @@ public class RouletteCommand implements CommandExecutor, TabCompleter {
         switch (args[0].toLowerCase()) {
             case "create" -> requireAdmin(sender, () -> create(sender));
             case "remove" -> requireAdmin(sender, () -> remove(sender, args));
+            case "undo" -> requireAdmin(sender, () -> undo(sender, args));
             case "list" -> list(sender);
             case "chip" -> chip(sender, args);
             case "balance" -> balance(sender);
@@ -80,6 +81,36 @@ public class RouletteCommand implements CommandExecutor, TabCompleter {
         send(sender, plugin.getTableManager().removeTable(nearest.getId())
                 ? Messages.format("table-removed", "id", nearest.getId())
                 : Messages.get("table-not-found"));
+    }
+
+    /**
+     * Полный откат: убрать стол и восстановить блоки, которые были на этом
+     * месте до {@code /roulette create}.
+     */
+    private void undo(CommandSender sender, String[] args) {
+        RouletteTable table;
+        if (args.length >= 2) {
+            table = plugin.getTableManager().get(args[1]);
+        } else {
+            if (!(sender instanceof Player player)) {
+                send(sender, Messages.get("only-players"));
+                return;
+            }
+            table = plugin.getTableManager().nearestTable(player.getLocation(), 60);
+        }
+        if (table == null) {
+            send(sender, Messages.get("table-not-found"));
+            return;
+        }
+        String id = table.getId();
+        var result = plugin.getTableManager().undoTable(id);
+        if (result == null) {
+            send(sender, Messages.get("table-not-found"));
+            return;
+        }
+        send(sender, result == Frontiks.Craft.casino.table.TableManager.UndoResult.RESTORED
+                ? Messages.format("table-undo-restored", "id", id)
+                : Messages.format("table-undo-cleared", "id", id));
     }
 
     private void list(CommandSender sender) {
@@ -200,11 +231,12 @@ public class RouletteCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> subs = new ArrayList<>(List.of("list", "chip", "balance"));
             if (sender.hasPermission("roulette.admin")) {
-                subs.addAll(List.of("create", "remove", "give", "set", "spin", "reload"));
+                subs.addAll(List.of("create", "remove", "undo", "give", "set", "spin", "reload"));
             }
             String prefix = args[0].toLowerCase();
             subs.stream().filter(s -> s.startsWith(prefix)).forEach(result::add);
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("remove")) {
+        } else if (args.length == 2
+                && (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("undo"))) {
             plugin.getTableManager().all().forEach(t -> result.add(t.getId()));
         } else if (args.length == 3 && (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("set"))) {
             result.add("1000");
